@@ -21,17 +21,19 @@ public class Game {
 	private ArrayList<Boolean> keyHeld = new ArrayList<Boolean>();
 	private ReadOnlyDoubleProperty screenWidth;
 	private ReadOnlyDoubleProperty screenHeight;
+	
+	private double playerSize = 0.8d;
+	
 	protected Player player;
 	protected Map map;
 	protected Narrator narrator;
 	protected UserInterface ui;
 	
+	
 	public Game(GameHandler sender, GraphicsContext gc, Boolean showIntro){
 		
 		this.gc = gc;
 		levelPane = new BorderPane();
-		
-		//levelPane.setStyle("-fx-background-color: #4f06ad33;");
 		levelPane.setPadding(new Insets(10));
 		
 		narrator = new Narrator();
@@ -39,9 +41,7 @@ public class Game {
 		
 		levelPane.setBottom(narrator.getTextNode());
 		BorderPane.setAlignment(narrator.getTextNode(),Pos.CENTER);
-		
 		levelPane.setRight(ui.getPane());
-		//BorderPane.setAlignment(ui.getPane(),Pos.CENTER);
 		
 		for(int i = 0; i < 4; i++){
 			keyHeld.add(false);
@@ -50,7 +50,7 @@ public class Game {
 		try {
 			
 			player = new Player("res/tokinoiori08.png", 0.2d);
-			map = new Map("./res/forest.tmx");
+			map = new Map("./res/map.tmx");
 			
 			player.addToInventory(new JFXItem("cellphone", false));
 			
@@ -85,11 +85,11 @@ public class Game {
 		
 		screenWidth.addListener((observable, oldValue, newValue) -> {
 		    System.out.println("screenWidth changed, redrawing...");
-		    map.tileMap.resolutionChange("x", (double)newValue - (double)oldValue);
+		    map.resolutionChange("x", (double)newValue - (double)oldValue);
 		});
 		screenHeight.addListener((observable, oldValue, newValue) -> {
 		    System.out.println("screenHeight changed, redrawing...");
-		    map.tileMap.resolutionChange("y", (double)newValue - (double)oldValue);
+		    map.resolutionChange("y", (double)newValue - (double)oldValue);
 		});
 				
 	}
@@ -100,28 +100,28 @@ public class Game {
 		gc.clearRect(0, 0, screenWidth.doubleValue(), screenHeight.doubleValue()); // clear frame
 		
 		if(player.walking){
-			map.tileMap.scrollMap(player.walkingSpeed, player.walkingDirection);
+			map.movePlayer(player, player.walkingSpeed*playerSize, player.walkingDirection);
 		}
 		
-		map.tileMap.drawMap(gc, 0, 2);
+		map.drawMap(gc, 0, 3);
 		drawCharacters(deltaTime);
-		map.tileMap.drawMap(gc, 2, 3);
+		map.drawMap(gc, 3, 4);
 		
 		
 	}
 	
 	private void drawCharacters(double deltaTime){
 		
-		double walkingX = (screenWidth.doubleValue()/2)-(player.playerSprite.chunkWidth/2);
-		double walkingY = (screenHeight.doubleValue()/2)-(player.playerSprite.chunkHeight/2);
+		double walkingX = (screenWidth.doubleValue()/2)-(player.playerSprite.chunkWidth/2) + player.deltaX;;
+		double walkingY = (screenHeight.doubleValue()/2)-(player.playerSprite.chunkHeight/2) + player.deltaY;
 		
 		if(player.walking){
 			
 			player.playerSprite.duration = (0.2d*(1d/player.walkingSpeed));
-			gc.drawImage( player.playerSprite.getFrame(deltaTime, player.walkingDirection), walkingX, walkingY );
+			gc.drawImage( player.playerSprite.getFrame(deltaTime, player.walkingDirection), walkingX, walkingY, playerSize*32, playerSize*48 );
 			
 		}else{
-			gc.drawImage( player.playerSprite.getFrame(0, player.walkingDirection), walkingX, walkingY );
+			gc.drawImage( player.playerSprite.getFrame(0, player.walkingDirection), walkingX, walkingY, playerSize*32, playerSize*48 );
 			
 		}
 		
@@ -139,7 +139,7 @@ public class Game {
 		}
 		
         if(keyCode == KeyCode.SPACE || keyCode == KeyCode.SHIFT){
-        	player.walkingSpeed = 10;//2
+        	player.walkingSpeed = 5;//3
         }  
         
         if(keyCode == KeyCode.DIGIT1){
@@ -176,18 +176,21 @@ public class Game {
 	
 	protected void useItem(JFXItem item){
 		
-		if(map.itemUsable(item)){
-			File file = new File("res/strings/" + item.getName());
-			if(file.exists()){
-				narrator.narrate(file, 10, map);
-			}else{
-				narrator.narrate("You used the " + item.getName() + "!", 10, map);
+		JFXEvent e = map.getEventByItem(item);
+		
+		if(e!=null){
+			narrateItem(item);
+			
+			if(e.getEventType().equals(e.itemEvent())){
+				player.addToInventory(e.getGiveItem());
 			}
 			
 			if(item.isRemovable()){
 				player.removeFromInventory(item);
-				ui.updateInventory(player.getInventory());
 			}
+			
+			ui.updateInventory(player.getInventory());
+			
 		}else{
 			narrator.narrate("You can't use the " + item.getName() + " here...", 10, map);
 		}
@@ -231,6 +234,17 @@ public class Game {
 		
 		narrator.narrate(new File("res/strings/intro"), 8, map);
 		
+		
+	}
+	
+	private void narrateItem(JFXItem item){
+		
+		File file = new File("res/strings/" + item.getName());
+		if(file.exists()){
+			narrator.narrate(file, 10, map);
+		}else{
+			narrator.narrate("You used the " + item.getName() + "!", 10, map);
+		}
 		
 	}
 	

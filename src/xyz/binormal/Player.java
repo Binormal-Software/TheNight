@@ -15,6 +15,9 @@ public class Player {
 	public JFXAnimatedSprite playerSprite;
 	
 	
+	public double deltaX;
+	public double deltaY;
+	
 	public Player(String spritePath, double spriteDelay) throws IOException{ // player constructor
 		
 		playerSprite = new JFXAnimatedSprite(spritePath, spriteDelay);

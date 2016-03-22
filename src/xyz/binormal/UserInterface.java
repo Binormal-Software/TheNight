@@ -32,6 +32,8 @@ public class UserInterface {
 	
 	public void updateInventory(ArrayList<JFXItem> inventory){
 		
+		System.out.println("Refreshing inventory panel, " + inventory.size() + " items.");
+		
 		
 		for(Button b: itemButtons){
 			uiPane.getChildren().remove(b);
