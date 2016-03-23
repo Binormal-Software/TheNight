@@ -139,7 +139,7 @@ public class Game {
 		}
 		
         if(keyCode == KeyCode.SPACE || keyCode == KeyCode.SHIFT){
-        	player.walkingSpeed = 5;//3
+        	player.walkingSpeed = 10;//3
         }  
         
         if(keyCode == KeyCode.DIGIT1){
@@ -176,10 +176,10 @@ public class Game {
 	
 	protected void useItem(JFXItem item){
 		
-		JFXEvent e = map.getEventByItem(item);
+		JFXEvent e = map.getEventByItem(player, item);
 		
-		if(e!=null){
-			narrateItem(item);
+		if(e!=null && !e.eventDone()){
+			narrateItem(item, "use");
 			
 			if(e.getEventType().equals(e.itemEvent())){
 				player.addToInventory(e.getGiveItem());
@@ -190,19 +190,20 @@ public class Game {
 			}
 			
 			ui.updateInventory(player.getInventory());
+			e.doEvent();
 			
 		}else{
-			narrator.narrate("You can't use the " + item.getName() + " here...", 10, map);
+			narrateItem(item, "fail");
 		}
 		
 	}
 	
 	protected void checkForItems(){
 		
-		if(map.nearItem()){
-			JFXItem item = map.nearestItem();
+		if(map.nearestItem(player)!=null){
+			JFXItem item = map.nearestItem(player);
 			item.take();
-			narrator.narrate("You found a " + item.getName(), 10, map);
+			narrateItem(item, "find");
 			player.addToInventory(item);
 			ui.updateInventory(player.getInventory());
 		}
@@ -237,13 +238,13 @@ public class Game {
 		
 	}
 	
-	private void narrateItem(JFXItem item){
+	private void narrateItem(JFXItem item, String messageType){
 		
-		File file = new File("res/strings/" + item.getName());
+		File file = new File("res/strings/" + item.getName() + "_" + messageType);
 		if(file.exists()){
 			narrator.narrate(file, 10, map);
 		}else{
-			narrator.narrate("You used the " + item.getName() + "!", 10, map);
+			narrator.narrate("" + item.getName() + "; " + file.getPath() + " not found...", 10, map);
 		}
 		
 	}

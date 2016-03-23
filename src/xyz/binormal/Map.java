@@ -1,6 +1,5 @@
 package xyz.binormal;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -13,8 +12,6 @@ import com.sun.javafx.geom.Rectangle;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Map {
-
-	public Player player;
 	
 	private JFXTileMap tileMap;
 	
@@ -108,32 +105,24 @@ public class Map {
 		tileMap.resolutionChange(dimension, delta);
 	}
 	
-	public Boolean nearItem(){
+	public JFXItem nearestItem(Player player){
 		
 		for(JFXItem i: itemList){
-			if(!i.taken && i.getBounds().contains( (int)tileMap.getPlayerLocation()[0], (int)tileMap.getPlayerLocation()[1])){
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	public JFXItem nearestItem(){
-		
-		for(JFXItem i: itemList){
-			if(!i.taken && i.getBounds().contains( (int)tileMap.getPlayerLocation()[0], (int)tileMap.getPlayerLocation()[1])){
+			if(!i.taken && i.getBounds().contains(
+					(int)(tileMap.getPlayerLocation()[0] + player.deltaX),
+					(int)(tileMap.getPlayerLocation()[1] + player.deltaY))){
 				return i;
 			}
 		}
 		return null;
 	}
 	
-	public JFXEvent getEventByItem(JFXItem item){
+	public JFXEvent getEventByItem(Player player, JFXItem item){
 		
 		for(JFXEvent e: eventList){
 			if(e.getEventType().equals(e.itemEvent())){
-				if(e.getBounds().contains( (int)tileMap.getPlayerLocation()[0], (int)tileMap.getPlayerLocation()[1])){
+				if(e.getBounds().contains( (int)(tileMap.getPlayerLocation()[0] + player.deltaX),
+						(int)(tileMap.getPlayerLocation()[1] + player.deltaY))){
 					if(e.getTakeItem().getName().equals(item.getName())){
 						return e;
 					}
