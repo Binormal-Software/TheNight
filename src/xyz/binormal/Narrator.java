@@ -36,6 +36,7 @@ public class Narrator {
 	private Boolean transitionDone;
 	private Boolean narrationDone = true;
 	private Text nextIndicator;
+	private Runnable onFinishedAction;
 	
 	public Narrator(){
 		textPane = new StackPane();
@@ -54,6 +55,10 @@ public class Narrator {
 	
 	public Node getTextNode(){
 		return textPane;
+	}
+	
+	public void setOnFinished(Runnable e){
+		this.onFinishedAction = e;
 	}
 	
 	public void narrate(String input, int speed, Map map){
@@ -121,6 +126,8 @@ public class Narrator {
 				if(messageIndex == messageString.size() - 1){ // end of msg
 					fadeOut(textPane);
 					narrationDone = true;
+					if(onFinishedAction!=null)
+						onFinishedAction.run();
 				}else{
 					fadeOut(messageText.get(messageIndex));
 				}

@@ -37,6 +37,10 @@ public class Game {
 		levelPane.setPadding(new Insets(10));
 		
 		narrator = new Narrator();
+		narrator.setOnFinished(() -> {
+		    ui.updateInventory(player.getInventory());
+		    });
+		
 		ui = new UserInterface(this);
 		
 		levelPane.setBottom(narrator.getTextNode());
@@ -179,7 +183,7 @@ public class Game {
 		JFXEvent e = map.getEventByItem(player, item);
 		
 		if(e!=null && !e.eventDone()){
-			narrateItem(item, "use");
+			
 			
 			if(e.getEventType().equals(e.itemEvent())){
 				player.addToInventory(e.getGiveItem());
@@ -189,7 +193,7 @@ public class Game {
 				player.removeFromInventory(item);
 			}
 			
-			ui.updateInventory(player.getInventory());
+			narrateItem(item, "use");
 			e.doEvent();
 			
 		}else{
@@ -203,9 +207,9 @@ public class Game {
 		if(map.nearestItem(player)!=null){
 			JFXItem item = map.nearestItem(player);
 			item.take();
-			narrateItem(item, "find");
 			player.addToInventory(item);
-			ui.updateInventory(player.getInventory());
+			narrateItem(item, "find");
+			
 		}
 		
 	}

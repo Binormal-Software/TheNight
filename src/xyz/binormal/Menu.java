@@ -16,8 +16,8 @@ import javafx.scene.text.TextAlignment;
 public class Menu {
 
 	private VBox menuBox;
-	String fontTitle = "Crimes Times Six";
-	
+	private final String FONT_TITLE = "Crimes Times Six";
+	//private Runnable onClick;
 	
 	public Menu(GameHandler sender, String title, List<String> menuOptions){
 		
@@ -27,7 +27,7 @@ public class Menu {
 		
 		
 		Text text = new Text(title);
-		text.setFont(Font.font (fontTitle, 100));
+		text.setFont(Font.font (FONT_TITLE, 100));
 		text.setTextAlignment(TextAlignment.CENTER);
 		text.setFill(Color.WHITE);
 		menuBox.setPadding(new Insets(30));
@@ -40,6 +40,7 @@ public class Menu {
 			button[i] = new Button(menuOptions.get(i));
 			button[i].setOnAction(e -> {
 				sender.parseInput(button[index].getText());
+				//onClick.run();
 			});
 			button[i].setStyle(getButtonStyle(0));
 			button[i].setOnMouseEntered(e -> {
@@ -77,7 +78,7 @@ public class Menu {
 				+ " -fx-background-radius: 3;"
 				+ " -fx-padding: 0 30 5 30;"
 				+ " -fx-text-fill: white;"
-				+ " -fx-font: 24 \"" + fontTitle + "\";";
+				+ " -fx-font: 24 \"" + FONT_TITLE + "\";";
 		
 		
 	}
